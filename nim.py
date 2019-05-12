@@ -30,6 +30,7 @@ class Game:
     def isOver(self):
         return self.sticks <= 0
 
+# Q Learning Agent
 class QLearner:
     def __init__(self):
         self.q = []
@@ -37,17 +38,22 @@ class QLearner:
             self.q.append([0] * len(ACTION_SPACE))
 
     def getMove(self, state):
+        # Pick action that the agent remembers having the best reward, on average.
         potential_actions = self.q[state]
         action_chosen = potential_actions.index(max(potential_actions))
         return action_chosen
 
     def learn(self, state, action, new_state, reward, is_over):
         if is_over:
+            # If the game was over, new_state is not a valid state.
+            # Remembers that doing "action" in "state" gave some reward.
             self.q[state][action] = reward
         else:
+            # Remember that taking the given action in "state" lead to "new_state"
+            # (whose value we may have an idea of) and gave some reward.
             self.q[state][action] = reward + sum(self.q[new_state]) / len(self.q[new_state])
-            #self.q[state][action] = reward + min(self.q[new_state])
 
+# Opponent that just takes random actions.
 class RandomOpponent:
     def __init__(self):
         return
@@ -58,6 +64,7 @@ class RandomOpponent:
     def learn(self, state, action, new_state, reward, is_over):
         return
 
+# Opponent that lets a human decide the moves.
 class HumanOpponent:
     def __init__(self):
         return
@@ -68,10 +75,7 @@ class HumanOpponent:
     def learn(self, state, action, new_state, reward, is_over):
         return
 
-learner = QLearner()
-
-
-def runTrial(learner, number_of_trials, opponent_learner_type, verbose):
+def runTrial(learner, number_of_trials, opponent_learner_type, verbose, make_graph, print_q_values):
     q_wins = []
 
     opponent = opponent_learner_type()
@@ -111,7 +115,8 @@ def runTrial(learner, number_of_trials, opponent_learner_type, verbose):
 
             new_state = game.getState()
             learner.learn(state, action, new_state, reward, game.isOver())
-            #print(learner.q)
+            if (print_q_values):
+                print(learner.q)
             state = new_state
 
             if (verbose):
@@ -123,17 +128,25 @@ def runTrial(learner, number_of_trials, opponent_learner_type, verbose):
         if want_to_exit:
             break
 
-    q_win_x = []
-    q_win_y = []
-    for x in range(GRAPH_SMOOTHING, len(q_wins)):
-        values_to_average = q_wins[max(0, x - GRAPH_SMOOTHING):x+1]
-        rolling_average = float(sum(values_to_average)) / len(values_to_average)
-        q_win_y.append(rolling_average)
-        q_win_x.append(x)
-    plt.plot(q_win_x, q_win_y, label="Q-Learner Win Rate")
-    plt.fill_between(q_win_x, 0, q_win_y, label="Q-Learner Win Rate")
-    plt.show()
 
-#runTrial(learner, 100, RandomOpponent, False)
+    if (make_graph):
+        q_win_x = []
+        q_win_y = []
+        for x in range(GRAPH_SMOOTHING, len(q_wins)):
+            values_to_average = q_wins[max(0, x - GRAPH_SMOOTHING):x+1]
+            rolling_average = float(sum(values_to_average)) / len(values_to_average)
+            q_win_y.append(rolling_average)
+            q_win_x.append(x)
+        plt.plot(q_win_x, q_win_y, label="Q-Learner Win Rate")
+        plt.fill_between(q_win_x, 0, q_win_y, label="Q-Learner Win Rate")
+        plt.show()
 
-runTrial(learner, 1000, HumanOpponent, True)
+
+
+learner = QLearner()
+
+# Train against a random opponent.
+runTrial(learner, 100, RandomOpponent, False, True, False)
+
+# Let human play against it.
+runTrial(learner, 1000, HumanOpponent, True, False, False)
