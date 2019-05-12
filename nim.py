@@ -1,7 +1,7 @@
 import random
 import matplotlib.pyplot as plt
 
-GRAPH_SMOOTHING = 20
+GRAPH_SMOOTHING = 3
 
 GAME_SIZE = 10
 ACTION_SPACE = [i for i in range(1,4)]
@@ -12,17 +12,9 @@ class Game:
 
     def remove(self, count):
         self.sticks -= count
-        if self.sticks <= 0:
-            return True
-        return False
 
     def getState(self):
         return self.sticks - 1
-
-    def getReward(self):
-        if self.sticks <= 0:
-            return -1
-        return 0
 
     def getActionSpace(self):
         return ACTION_SPACE
@@ -146,7 +138,7 @@ def runTrial(learner, number_of_trials, opponent_learner_type, verbose, make_gra
 learner = QLearner()
 
 # Train against a random opponent.
-runTrial(learner, 100, RandomOpponent, False, True, False)
+#runTrial(learner, 100, RandomOpponent, False, True, False)
 
 # Let human play against it.
-runTrial(learner, 1000, HumanOpponent, True, False, False)
+runTrial(learner, 1000, HumanOpponent, True, True, False)
