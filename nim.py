@@ -173,7 +173,7 @@ def runTrial(learner, number_of_trials, opponent_learner_type, verbose, make_gra
                 if game.isOver():
                     if (verbose):
                         print("Q-Learner won.")
-                    reward = 0
+                    reward = 1
                     q_wins.append(1)
 
             new_state = game.getState()
