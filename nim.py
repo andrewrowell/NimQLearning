@@ -96,7 +96,7 @@ class QLearner:
         else:
             # Remember that taking the given action in "state" lead to "new_state"
             # (whose value we may have an idea of) and gave some reward.
-            self.q[state][action] = reward + sum(self.q[new_state]) / len(self.q[new_state])
+            self.q[state][action] = reward + max(self.q[new_state])
 
 class RandomOpponent:
     '''
